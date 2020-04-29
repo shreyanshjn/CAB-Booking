@@ -8,9 +8,10 @@ var cors = require('cors')
 var mongoose =require('mongoose')
 var routes = require('./routes/routes')
 var app=express()
+var debug = require('debug')('mean-app:server');
 
 // mongoose.Promise = require('bluebird')
-const uri = `mongodb+srv://shreyansh:${process.env.mongoDbPass}@cluster0-wfbhz.mongodb.net/test?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://shreyansh:${process.env.MONGODBPASS}@cluster0-wfbhz.mongodb.net/test?retryWrites=true&w=majority`;
 mongoose.set('useCreateIndex', true) // To remove this warning. DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
 mongoose
     // .connect(uri, {promiseLibrary: require('bluebird'), useNewUrlParser: true, useUnifiedTopology: true  })
@@ -54,12 +55,74 @@ app.use(function(err, req, res, next) {
     res.render('error')
 })
 
-var port=4003
-app.set('port',port)
+
+var port
+if (process.env.REACT_APP_SERVER_ENVIORNMENT === "dev") {
+  port = normalizePort(process.env.REACT_APP_SERVER_PORT || '3000');
+} else {
+  port = normalizePort(process.env.PORT || '3000');
+}
+app.set('port', port);
+
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
 
 //create a http server
 var server = http.createServer(app)
 
+
 server.listen(port, () => {
     console.log('Listening')
 })
+server.on('error', onError);
+server.on('listening', onListening);
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
