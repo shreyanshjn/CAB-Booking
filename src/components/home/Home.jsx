@@ -10,7 +10,7 @@ export default class App extends React.Component {
                 <Link to="/register">
                     <button>Register</button>
                 </Link>
-                <Link to="/register">
+                <Link to="/login">
                     <button>Login</button>
                 </Link>
             </div>
