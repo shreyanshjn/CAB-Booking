@@ -7,14 +7,14 @@ var bodyParser = require('body-parser')
 var cors = require('cors')
 var mongoose =require('mongoose')
 var routes = require('./routes/routes')
-
 var app=express()
 
-mongoose.Promise = require('bluebird')
+// mongoose.Promise = require('bluebird')
 const uri = `mongodb+srv://shreyansh:${process.env.mongoDbPass}@cluster0-wfbhz.mongodb.net/test?retryWrites=true&w=majority`;
 mongoose.set('useCreateIndex', true) // To remove this warning. DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
 mongoose
-    .connect(uri, {promiseLibrary: require('bluebird'), useNewUrlParser: true, useUnifiedTopology: true  })
+    // .connect(uri, {promiseLibrary: require('bluebird'), useNewUrlParser: true, useUnifiedTopology: true  })
+    .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true  })
     .then (()=> console.log('connection successful'))
     .catch((err)=> console.log(err))
 
@@ -45,6 +45,7 @@ app.use(function (req, res, next) {
 })
 
 app.use(function(err, req, res, next) {
+    console.log('afa')
     //set locals, only providing error in dev
     res.locals.message = err.message
     res.locals.error = req.app.get('env') === 'developement' ? err : {}
@@ -59,4 +60,6 @@ app.set('port',port)
 //create a http server
 var server = http.createServer(app)
 
-server.listen(port)
+server.listen(port, () => {
+    console.log('Listening')
+})

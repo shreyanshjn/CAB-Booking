@@ -1,4 +1,5 @@
-import React from 'react';
+import React from 'react'
+import { Link } from 'react-router-dom'
 
 export default class App extends React.Component {
     render()
@@ -6,10 +7,12 @@ export default class App extends React.Component {
         return (
             <div>
                 Home Page
-                <button>Register</button>
-                <button>Login</button>
-                <button>Register as Driver</button>
-                <button>Register as Rider</button>
+                <Link to="/register">
+                    <button>Register</button>
+                </Link>
+                <Link to="/register">
+                    <button>Login</button>
+                </Link>
             </div>
         )
     }
