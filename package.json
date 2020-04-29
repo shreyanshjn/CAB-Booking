@@ -28,11 +28,10 @@
     "semantic-ui-react": "^0.88.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "npm run build && node ./server/app",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "http": "node ./server/app",
     "server": "nodemon ./server/app"
   },
   "eslintConfig": {
