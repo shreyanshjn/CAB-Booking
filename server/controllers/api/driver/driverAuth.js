@@ -5,8 +5,8 @@ var { generateUserToken } = require('../../../helpers/TokenHelper')
 var bcrypt = require('bcryptjs')
 
 exports.registerDriver = async (req, res) =>  {
-    const { name, email, gender, password } = req.body
-    if(!name || !email || !gender || !password)
+    const { name, email, gender, phone, password } = req.body
+    if(!name || !email || !gender || !password || !phone)
     {
         res.status(400).send({
             error: true,
@@ -23,14 +23,16 @@ exports.registerDriver = async (req, res) =>  {
         var hashedPass = await generateHash(password)
         if(hashedPass)
         {
-            var data={ name, email, gender, password }
+            var data={ name, email, gender, password, phone }
+            console.log(data)
             data.password=hashedPass
             var newUser = new driverSchema(data)
             var saveUser = await newUser.save();
             console.log(saveUser)
             if(saveUser._id)
             {
-                res.status(400).send({
+                res.status(200).send({
+                    success: true,
                     msg  : 'Successfully registered'
                 })
             }

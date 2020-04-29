@@ -1,12 +1,9 @@
 import axios from 'axios'
 // require('dotenv').config()
 
-console.log(process.env.REACT_ENV)
-console.log(process.env.React_env)
 const FetchApi = (method, url, params, TokenValue) => {
-    if (process.env.React_env === 'dev') {
-        url = 'http://localhost:' + process.env.React_server_port + url
-        console.log(url)
+    if (process.env.REACT_APP_SERVER_ENVIORNMENT === 'dev') {
+        url = 'http://localhost:' + process.env.REACT_APP_SERVER_PORT + url
     }
     console.log(url)
         console.log(process.env)

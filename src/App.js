@@ -5,6 +5,7 @@ import Test from './components/test/Test'
 import Home from './components/home/Home'
 import Register from './components/register/Register'
 import Login from './components/login/Login'
+import Rider from './components/rider/Index'
 
 export default class App extends React.Component {
     render()
@@ -14,8 +15,9 @@ export default class App extends React.Component {
                 <Switch>
                     <Route exact path="/test" component={Test} />
                     <Route exact path="/" component={Home} />
-                    <Route exact path="/register" component={Register} />
-                    <Route exact path="/login" component={Login} />
+                    <Route exact path="/register" render={props => (<Register {...props} />)} />
+                    <Route exact path="/login" render={props => (<Login {...props} />)} />
+                    <Route exact path="/rider" render={props => (<Rider {...props} />)} />
                 </Switch>
             </BrowserRouter>
         )

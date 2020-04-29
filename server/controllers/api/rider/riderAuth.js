@@ -5,8 +5,8 @@ var { generateUserToken } = require('../../../helpers/TokenHelper')
 var bcrypt = require('bcryptjs')
 
 exports.registerRider= async (req, res) =>  {
-    const { name, email, gender, password } = req.body
-    if(!name || !email || !gender || !password)
+    const { name, email, gender, password, phone } = req.body
+    if(!name || !email || !gender || !password || !phone)
     {
         res.status(400).send({
             error: true,
@@ -23,15 +23,16 @@ exports.registerRider= async (req, res) =>  {
         var hashedPass = await generateHash(password)
         if(hashedPass)
         {
-            var data={ name, email, gender, password }
+            var data={ name, email, gender, password, phone }
             data.password=hashedPass
             var newUser = new riderSchema(data)
             var saveUser = await newUser.save();
             console.log(saveUser)
             if(saveUser._id)
             {
-                res.status(400).send({
-                    msg  : 'Successfully registered'
+                res.status(200).send({
+                    msg  : 'Successfully registered',
+                    success: true
                 })
             }
             else
@@ -98,7 +99,7 @@ exports.loginRider=  async (req, res) => {
                 var _userId  = user._id
                 var data = { _userId, token }
                 var newToken = new riderToken(data)
-                var saveToken = newToken.save()
+                var saveToken = await newToken.save()
                 console.log(saveToken,'token')
                 if(saveToken)
                 {
