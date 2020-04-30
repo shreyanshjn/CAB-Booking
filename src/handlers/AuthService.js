@@ -11,7 +11,7 @@ export default class AuthService extends React.Component {
     }
 
     logout(token_name) {
-        if (this.getToken()) {
+        if (this.getToken(token_name)) {
             localStorage.removeItem(token_name)
         }
     }

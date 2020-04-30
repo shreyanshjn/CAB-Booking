@@ -1,7 +1,7 @@
 import React from 'react'
 import FetchApi from '../../utils/FetchApi'
-import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
-import {TextField, FormControl, RadioGroup,FormLabel,Radio, FormControlLabel, Button} from '@material-ui/core'
+import {TextField, FormControl, RadioGroup,Radio, FormControlLabel, Button} from '@material-ui/core'
+import { Alert, AlertTitle } from '@material-ui/lab';
 import styles from './css/register.module.css'
 
 export default class Register extends React.Component {
@@ -17,6 +17,7 @@ export default class Register extends React.Component {
             user:'',
             latitude:'',
             longitude:'',
+            error: ''
         }
     }
     displayLocationInfo = (position) => {
@@ -31,46 +32,50 @@ export default class Register extends React.Component {
         let value = e.target.value
         console.log(name)
         this.setState({
-            [name]: value
+            [name]: value,
+            error: ''
         })
         console.log(value)
     }
-    onSubmit = (e) => {
+    onSubmit = async (e) => {
         e.preventDefault()
         let { name, email, phone, gender, password, user } = this.state
         const data ={ name, email, phone, gender, password }
         console.log(data)
-        if(data)
+        console.log(user)
+        if(data && user)
         {
-            FetchApi('post', `/api/${user}/register`, data)
+            await FetchApi('post', `/api/${user}/register`, data)
                 .then(res=>{
                     if(res && res.data.success===true)
                     {
-                        console.log('done')
                         this.props.history.push('/login')
                     }
                 })
                 .catch(err=>{
-                    console.log(err.response,'error')
-                    if(err && err.response && err.response.data && err.response.data.message)
+                    console.log(err.response)
+                    if(err && err.response && err.response.data && err.response.data.msg)
                     {
                         this.setState({
-                            error: err.response.data.message,
-                            show: true
+                            error: err.response.data.msg,
                         })
                     }
                     else {
                         this.setState({
                             error:'Something went wrong',
-                            show: true
                         })
                     }
                 })
         }
+        else
+        {
+            this.setState({
+                error: 'All fields are required'
+            })
+        }
     }
     render()
     {
-        console.log(this.props)
         // if (navigator.geolocation) {
         //     navigator.geolocation.getCurrentPosition(this.displayLocationInfo);
         // }
@@ -79,10 +84,13 @@ export default class Register extends React.Component {
         // setTimeout(() => {
         //     navigator.geolocation.clearWatch(watcher);
         // }, 15000);
-        let { name, email, phone, password, gender, user } = this.state
+        let { name, email, phone, password, gender, user, error } = this.state
         return (
             <div>
-                {console.log(this.state.latitude,this.state.longitude)}
+                {error ? <Alert severity="error" className={styles.alertDiv}>
+                    <AlertTitle>Error</AlertTitle>
+                     <strong>{error}</strong>
+                </Alert>: null}
                 {/* <Map center={[29.869370600000003,77.8950389]} zoom={12} touchZoom={false} zoomSnap={0} dragging={false} doubleClickZoom={false} zoomSnap={0} boxZoom={false}> */}
 
                 {/*     <TileLayer attribution='&copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" /> */}
@@ -91,35 +99,52 @@ export default class Register extends React.Component {
                 <form onSubmit={this.onSubmit} className={styles.loginOuterDiv}>
                     <h1>Register</h1>
                     <FormControl component="fieldset" className={styles.formInnerDiv}>
-                        <TextField 
-                            id="standard-basic" 
-                            label="name" 
+                        <TextField
+                            name="name"
                             onChange={this.handleChange}
                             value={name}
-                            name="name"
+                            id="filled-required"
+                            label="Name"
+                            variant="outlined"
                             required
                         />
-                        <TextField 
-                            id="standard-basic" 
-                            label="Email" 
+                        <br />
+                        <TextField
+                            name="email"
                             onChange={this.handleChange}
                             value={email}
-                            name="email"
+                            id="filled-required"
+                            label="Email"
+                            variant="outlined"
                             required
                         />
-                        <RadioGroup aria-label="gender" name="gender" value={gender} onChange={this.handleChange}>
-                            <FormControlLabel value="male" control={<Radio />} label="Male" />
-                            <FormControlLabel value="female" control={<Radio />} label="Female" />
-                        </RadioGroup>
-                        <TextField 
-                            id="standard-basic" 
-                            label="Password" 
+                        <br />
+                        <TextField
+                            name="password"
                             onChange={this.handleChange}
                             value={password}
+                            id="filled-required"
+                            label="Password"
+                            variant="outlined"
                             type="password"
-                            name="password"
                             required
                         />
+                        <br />
+                        <RadioGroup aria-label="gender" name="gender" value={gender} onChange={this.handleChange}>
+                            <FormControlLabel 
+                                value="male"
+                                control={<Radio />} 
+                                label="Male"
+                                required
+                            />
+                            <FormControlLabel
+                                value="female"
+                                control={<Radio />}
+                                label="Female"
+                                required
+                            />
+                        </RadioGroup>
+                        <br />
                         <TextField 
                             id="standard-basic" 
                             label="Contact" 
@@ -128,11 +153,23 @@ export default class Register extends React.Component {
                             name="phone"
                             required
                         />
-                        <RadioGroup aria-label="gender" name="user" value={user} onChange={this.handleChange}>
-                            <FormControlLabel value="rider" control={<Radio />} label="Rider" />
-                            <FormControlLabel value="driver" control={<Radio />} label="Driver" />
+                        <br />
+                        <RadioGroup aria-label="user" name="user" value={user} onChange={this.handleChange}>
+                            <FormControlLabel 
+                                value="rider"
+                                control={<Radio />}
+                                label="Rider" 
+                                required
+                            />
+                            <FormControlLabel 
+                                value="driver"
+                                control={<Radio />}
+                                label="Driver" 
+                                required
+                            />
                         </RadioGroup>
-                        <Button onClick={this.onSubmit} variant="contained" color="primary">
+                        <br />
+                        <Button onClick={this.onSubmit} variant="outlined" color="primary">
                             Submit
                         </Button>
                     </FormControl>

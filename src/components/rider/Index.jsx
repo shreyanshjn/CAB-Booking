@@ -1,15 +1,37 @@
 import React from 'react';
-import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
-import { details } from './data/sample'
+import { Map, TileLayer, Marker } from 'react-leaflet'
+import { Icon } from 'leaflet'
+import FetchApi from '../../utils/FetchApi'
+import Logout from '../logout/Logout'
 
+var carIcon = new Icon({
+    iconUrl: '/pickup-car.svg',
+    iconSize: [25,25]
+})
 export default class Rider extends React.Component {
     constructor()
     {
         super()
         this.state = {
             latitude: '',
-            longitude: ''
+            longitude: '',
+            drivers: ''
         }
+    }
+    async componentDidMount() 
+    {
+        var drivers = await FetchApi('get','/api/rider/getDrivers',null)
+        if(drivers && drivers.data && drivers.data.success)
+        {
+            this.setState({
+                drivers: drivers.data.data
+            })
+        }
+        else
+        {
+            console.log('error occured')
+        }
+
     }
     displayLocationInfo = (position) => {
         this.setState({
@@ -20,23 +42,34 @@ export default class Rider extends React.Component {
     }
     render()
     {
+        console.log(this.props)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(this.displayLocationInfo);
         }
-        const watcher = navigator.geolocation.watchPosition(this.displayLocationInfo);
-
+        // const watcher = navigator.geolocation.watchPosition(this.displayLocationInfo);
+        const { drivers } = this.state
+        // console.log(drivers)
         // setTimeout(() => {
         //     navigator.geolocation.clearWatch(watcher);
         // }, 15000);
         return (
             <div>
-                <Map center={[29.869370600000003,77.8950389]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} zoomSnap={0} boxZoom={false}>
+                <Map center={[this.state.longitude,this.state.latitude]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} boxZoom={false}>
 
                     <TileLayer attribution='&copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Marker position={[this.state.longitude,this.state.latitude]} />
-                    {/* <Marker position={[29.864370600000003,77.8950389]} /> */}
+                    <Marker 
+                        position={[this.state.longitude,this.state.latitude]} 
+                    />
+                    {drivers? drivers.map((cab,index) => (
+                        <Marker 
+                            icon={carIcon}
+                            position={[cab.longitude,cab.latitude]}
+                            key={index}
+                        />
+                    ))
+                    :null}
                 </Map>
-
+                <Logout user="rider" history={this.props.history} updateAuthentication={this.props.updateAuthentication} />
             </div>
         )
     }

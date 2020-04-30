@@ -1,0 +1,44 @@
+.homeOuterDiv
+{
+    background: black;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.heading
+{
+    text-align: center;
+}
+.firstDiv
+{
+    display: flex;
+    justify-content: space-between;
+}
+.buttonsDiv
+{
+    padding: 10px;
+}
+.buttons
+{
+    margin: 20px !important;
+}
+.logo
+{
+    margin-left: 20px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.taxi
+{
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+.horizontal
+{
+    width: 100%;
+}

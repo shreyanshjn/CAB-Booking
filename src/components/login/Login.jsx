@@ -1,8 +1,10 @@
 import React from 'react'
 import FetchApi from '../../utils/FetchApi'
 import AuthService from '../../handlers/AuthService'
-import {TextField, FormControl, RadioGroup,FormLabel,Radio, FormControlLabel, Button} from '@material-ui/core'
+import {TextField, FormControl, RadioGroup ,Radio, FormControlLabel, Button} from '@material-ui/core'
+import { Alert, AlertTitle } from '@material-ui/lab';
 import  styles from './css/login.module.css'
+import lock from './img/lock.jpg'
 
 export default class App extends React.Component {
     constructor()
@@ -11,7 +13,8 @@ export default class App extends React.Component {
         this.state={
             email:'',
             password:'asdfghjkl',
-            user: ''
+            user: '',
+            error: ''
         }
         this.Auth = new AuthService()
     }
@@ -19,75 +22,100 @@ export default class App extends React.Component {
         const name = e.target.name
         let value = e.target.value
         this.setState({
-            [name]: value
+            [name]: value,
+            error: ''
         })
-        console.log(value)
     }
-    onSubmit = (e) => {
+    onSubmit = async (e) => {
         e.preventDefault()
         let { email, password, user } = this.state
         const data ={ email, password }
-        console.log(data)
-        if(data)
+        if(data && data.email && data.password && user)
         {
-            FetchApi('post', `/api/${user}/login`, data)
-                .then(res=>{
-                    if(res && res.data.success===true)
+                 await FetchApi('post', `/api/${user}/login`, data)
+                .then(res=> {
+                    if(res && res.data)
                     {
-                        console.log(res.data)
-                        console.log('done')
-                        this.Auth.setToken('driver',res.data.data.token)
-                        this.props.history.push(`/${user}`)
+                        this.Auth.setToken(`${user}`,res.data.token)
+                        this.props.history.push(`${user}`)
+                        this.props.updateAuthentication(true,user)
                     }
                 })
-                .catch(err=>{
-                    console.log(err.response,'error')
-                    if(err && err.response && err.response.data && err.response.data.message)
+                .catch(err => {
+                    if(err.response && err.response.data && err.response.data.msg)
                     {
                         this.setState({
-                            error: err.response.data.message,
-                            show: true
+                            error: err.response.data.msg
                         })
                     }
-                    else {
+                    else
+                    {
                         this.setState({
-                            error:'Something went wrong',
-                            show: true
+                            error: 'Something went wrong'
                         })
                     }
                 })
         }
+        else
+        {
+            this.setState({
+                error: 'All fields are required'
+            })
+        }
     }
     render()
     {
-        let { email, password, user } = this.state
+        let { email, password, user,error } = this.state
         return (
-            <div>
+            <div className={styles.outerDiv}>
+                {error ? <Alert severity="error" className={styles.alertDiv}>
+                    <AlertTitle>Error</AlertTitle>
+                     <strong>{error}</strong>
+                </Alert>: null}
                 <form onSubmit={this.onSubmit} className={styles.loginOuterDiv}>
-                    <h1>Login</h1>
+                    <img src={lock} className={styles.lock} alt="sign in"/>
+                    <h1>Sign In</h1>
                     <FormControl component="fieldset" className={styles.formInnerDiv}>
-                        <TextField 
-                            id="standard-basic" 
-                            label="Email" 
+                        <TextField
+                            name="email"
                             onChange={this.handleChange}
                             value={email}
-                            name="email"
+                            id="filled-required"
+                            label="Email"
+                            variant="outlined"
                             required
                         />
-                        <TextField 
-                            id="standard-basic" 
-                            label="Password" 
+                        <br/>
+                        <br/>
+                        <TextField
+                            id="filled-required"
+                            label="Password"
+                            variant="outlined"
+                            type="password"
                             onChange={this.handleChange}
                             value={password}
                             name="password"
                             required
                         />
+                        <br/>
+                        <br/>
                         <RadioGroup aria-label="gender" name="user" value={user} onChange={this.handleChange}>
-                            <FormControlLabel value="rider" control={<Radio />} label="Rider" />
-                            <FormControlLabel value="driver" control={<Radio />} label="Driver" />
+                            <FormControlLabel 
+                                value="rider"
+                                control={<Radio />}
+                                label="Rider" 
+                                required
+                            />
+                            <FormControlLabel 
+                                value="driver"
+                                control={<Radio />}
+                                label="Driver" 
+                                required
+                            />
                         </RadioGroup>
-                    <Button onClick={this.onSubmit} variant="contained" color="primary">
-                        Submit
+                        <br />
+                    <Button onClick={this.onSubmit} variant="outlined" color="primary">
+                        Log In
                     </Button>
 </FormControl>
             </form>

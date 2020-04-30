@@ -1,5 +1,6 @@
 var driverSchema = require('../../../models/driver/driver')
 var driverToken = require('../../../models/driver/driver_token')
+var activeDriver = require('../../../models/driver/activeDriver')
 var { generateHash } = require('../../../helpers/HashPassword')
 var { generateUserToken } = require('../../../helpers/TokenHelper')
 var bcrypt = require('bcryptjs')
@@ -65,6 +66,7 @@ exports.loginDriver =  async (req, res) => {
     if(!email || !password)
     {
         res.status(400).send({
+            success: false,
             error: true,
             msg: 'Incomplete data received'
         })
@@ -76,6 +78,7 @@ exports.loginDriver =  async (req, res) => {
         if(!user)
         {
             res.status(400).send({
+                success: false,
                 error: true,
                 msg: 'Email id does not exists'
             })
@@ -91,6 +94,7 @@ exports.loginDriver =  async (req, res) => {
                 if(!deletePrevToken)
                 {
                     res.status(400).send({
+                        success: true,
                         error: true,
                         msg: 'Error deleting token'
                     })
@@ -107,13 +111,15 @@ exports.loginDriver =  async (req, res) => {
                     res.status(200).send({
                         success: true,
                         msg: 'Login Successful',
-                        data: saveToken
+                        data: user,
+                        token: token
                     })
                 }
             }
             else
             {
                 res.status(400).send({
+                    success: false,
                     error: true,
                     msg: 'Invalid password'
                 })
@@ -123,8 +129,113 @@ exports.loginDriver =  async (req, res) => {
     catch(error)
     {
         res.status(400).send({
+            success: false,
             error: true,
             msg: 'Something went wrong'
         })
+    }
+}
+
+exports.activeDriver  = async (req, res) => {
+    const { latitude, longitude, active } = req.body
+    const _userId = req.locals._id
+    if(!latitude || !longitude || !active || !_userId)
+    {
+        res.status(400).send({
+            success: false,
+            error: true,
+            msg: 'Incomplete info received'
+        })
+    }
+    else
+    {
+        try
+        {
+            var data = { latitude, longitude, active, _userId } 
+            var findDriver = await activeDriver.findOne({_userId: _userId})
+            console.log(findDriver,'findDriver')
+            if(findDriver)
+            {
+                var updatedData = {latitude, longitude}
+                var updateDriver = await activeDriver.updateOne({_userId: _userId},updatedData)
+                if(updateDriver)
+                {
+                    res.status(200).send({
+                        success: true,
+                        msg: 'Driver location updated'
+                    })
+                }
+                else
+                {
+                    res.status(400).send({
+                        success: false,
+                        error: true,
+                        msg: 'Error updating location'
+                    })
+                }
+            }
+            else
+            {
+                var newUser = new activeDriver(data)
+                var savedUser = await newUser.save()
+                console.log(savedUser)
+                if(!savedUser)
+                {
+                    res.status(400).send({
+                        success: false,
+                        error: true,
+                        msg: 'Error saving user'
+                    })
+                }
+                else
+                {
+                    res.status(200).send({
+                        success: true,
+                        msg: 'Successfully saved user'
+                    })
+                }
+            }
+        }
+        catch
+        {
+            res.status(400).send({
+                success: false,
+                error: true,
+                msg: 'Something went wrong'
+            })
+        }
+    }
+}
+
+exports.isAuthenticated = async (req, res) => {
+    if(req.locals._id)
+    {
+        try{
+            var data = await driverSchema.findOne({ _id: req.locals._id})
+            if(data)
+            {
+                return res.status(200).send({
+                    success: true,
+                    data: data,
+                    msg: 'Successfully find user'
+                })
+            }
+            else
+            {
+                return res.status(400).send({
+                    success: false,
+                    error: true,
+                    msg: 'No user found'
+                })
+            }
+        }
+        catch
+        {
+            return res.status(400).send({
+                success: false,
+                error: true,
+                msg: 'Something went wrong'
+            })
+        }
     }
 }
