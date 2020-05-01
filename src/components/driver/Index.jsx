@@ -71,7 +71,7 @@ export default class Driver extends React.Component
     getLocation = () => {
         if (navigator.geolocation) {
             // navigator.geolocation.getCurrentPosition(this.getCoordinates,this.handleErrors)
-            this.watchId = navigator.geolocation.watchPosition(this.getCoordinates,this.handleErrors)
+            this.watchId = navigator.geolocation.watchPosition(this.getCoordinates)
         } else {
             alert("Geolocation is not supported by this browser.")
         }
