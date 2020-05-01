@@ -1,0 +1,6 @@
+.homeButton {
+    position: absolute !important;
+    top: 10px;
+    left: 50px;
+    z-index: 500;
+}

@@ -156,7 +156,8 @@ exports.activeDriver  = async (req, res) => {
             console.log(findDriver,'findDriver')
             if(findDriver)
             {
-                var updatedData = {latitude, longitude}
+                var createdAt = Date.now()
+                var updatedData = {latitude, longitude, createdAt}
                 var updateDriver = await activeDriver.updateOne({_userId: _userId},updatedData)
                 if(updateDriver)
                 {

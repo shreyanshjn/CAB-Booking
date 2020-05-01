@@ -7,6 +7,8 @@ import Register from './components/register/Register'
 import Login from './components/login/Login'
 import Rider from './components/rider/Index'
 import Driver from './components/driver/Index'
+import DriverBooking from './components/driver/Bookings'
+import RiderBooking from './components/rider/Bookings'
 import AuthService from './handlers/AuthService'
 import FetchApi from './utils/FetchApi'
 
@@ -84,8 +86,17 @@ export default class App extends React.Component {
                         <Route exact path="/register" render={props => (<Register {...props} updateAuthentication={this.updateAuthentication} />)} />
                         <Route exact path="/login" render={props => (<Login {...props} updateAuthentication={this.updateAuthentication} isAuthenticated={this.state.isAuthenticated} />)} />
                     </React.Fragment>:
-                            this.state.user==="rider" ?<Route exact path="/rider" render={props => (<Rider {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />: 
-                            <Route exact path="/driver" render={props => (<Driver {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />}
+                            this.state.user==="rider" ?
+                            <React.Fragment>
+                                <Route exact path="/rider" render={props => (<Rider {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                                <Route exact path="/rider/:id" render={props => (<RiderBooking {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                            </React.Fragment>
+                            : 
+                            <React.Fragment>
+                                <Route exact path="/driver" render={props => (<Driver {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                                <Route exact path="/driver/:id" render={props => (<DriverBooking {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                            </React.Fragment>
+                            }
                         </Switch>
                     </BrowserRouter>
         )

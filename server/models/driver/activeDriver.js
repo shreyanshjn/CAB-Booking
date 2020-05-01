@@ -21,9 +21,8 @@ var DriverSchema = new Schema({
     },
     createdAt: {
         type: Date,
-        required: true,
         default: Date.now,
-        expires: 864000
+        index: { expires: '1m' }
     }
 })
 
