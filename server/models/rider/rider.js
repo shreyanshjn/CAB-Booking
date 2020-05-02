@@ -27,6 +27,12 @@ var DriverSchema = new Schema({
         type: Number,
         required: [true, 'phone is required']
     },
+    latitude: {
+        type: String,
+    },
+    longitude: {
+        type: String
+    },
     rides: [{
         _riderId: { 
             type: mongoose.Schema.Types.ObjectId,

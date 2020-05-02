@@ -135,36 +135,6 @@ exports.loginRider=  async (req, res) => {
     }
 }
 
-exports.getActiveDriver = async (req, res) => {
-    try
-    {
-        var drivers = await activeDriver.find()
-        if(!drivers)
-        {
-            res.status(400).send({
-                success: false,
-                error: true,
-                msg: 'Something went wrong'
-            })
-        }
-        else
-        {
-            res.status(200).send({
-                success: true,
-                msg: 'Successfully fetched users',
-                data: drivers
-            })
-        }
-    }
-    catch(error)
-    {
-        res.status(400).send({
-            success: false,
-            error: true,
-            msg: 'Something went wrong'
-        })
-    }
-}
 
 exports.isAuthenticated = async (req, res) => {
     if(req.locals && req.locals._id)

@@ -23,6 +23,16 @@ var DriverSchema = new Schema({
         type     : String,
         required : [true, 'gender is required'],
     },
+    latitude: {
+        type: String,
+    },
+    longitude: {
+        type: String
+    },
+    activeStatus: {
+        type: Boolean,
+        default: false
+    },
     phone : {
         type: Number,
         required: [true, 'phone is required']

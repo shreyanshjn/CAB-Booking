@@ -13,7 +13,6 @@ import AuthService from './handlers/AuthService'
 import FetchApi from './utils/FetchApi'
 
 export default class App extends React.Component {
-    _isMounted = false;
     constructor()
     {
         super()
@@ -32,9 +31,13 @@ export default class App extends React.Component {
             user: user
         })
     }
+    updateUserData = (newData) => {
+        this.setState({
+            userData: newData
+        })
+    }
     async componentDidMount()
     {   
-        this._isMounted = true;
         let token = this.Auth.getToken('driver')
         if(!token)
         {
@@ -71,10 +74,6 @@ export default class App extends React.Component {
                 })
         }
     }
-    componentWillUnmount()
-    {
-      this._isMounted=false
-    }
     render()
     {
         return (
@@ -88,12 +87,12 @@ export default class App extends React.Component {
                     </React.Fragment>:
                             this.state.user==="rider" ?
                             <React.Fragment>
-                                <Route exact path="/rider" render={props => (<Rider {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                                <Route exact path="/rider" render={props => (<Rider {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication} updateUserData={this.updateUserData} />)} />
                                 <Route exact path="/rider/:id" render={props => (<RiderBooking {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
                             </React.Fragment>
                             : 
                             <React.Fragment>
-                                <Route exact path="/driver" render={props => (<Driver {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
+                                <Route exact path="/driver" render={props => (<Driver {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication} updateUserData={this.updateUserData} />)} />
                                 <Route exact path="/driver/:id" render={props => (<DriverBooking {...props} userData={this.state.userData} isAuthenticated={this.state.isAuthenticated} updateAuthentication={this.updateAuthentication}/>)} />
                             </React.Fragment>
                             }

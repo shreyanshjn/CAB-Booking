@@ -4,6 +4,7 @@ var activeDriver = require('../../../models/driver/activeDriver')
 var { generateHash } = require('../../../helpers/HashPassword')
 var { generateUserToken } = require('../../../helpers/TokenHelper')
 var bcrypt = require('bcryptjs')
+var fields = 'name email gender latitude longitude activeStatus rides phone' 
 
 exports.registerDriver = async (req, res) =>  {
     const { name, email, gender, phone, password } = req.body
@@ -136,9 +137,10 @@ exports.loginDriver =  async (req, res) => {
     }
 }
 
-exports.activeDriver  = async (req, res) => {
+exports.setActive= async (req, res) => {
     const { latitude, longitude, active } = req.body
     const _userId = req.locals._id
+    console.log(req.body)
     if(!latitude || !longitude || !active || !_userId)
     {
         res.status(400).send({
@@ -213,6 +215,7 @@ exports.isAuthenticated = async (req, res) => {
     {
         try{
             var data = await driverSchema.findOne({ _id: req.locals._id})
+            .select(fields)
             if(data)
             {
                 return res.status(200).send({

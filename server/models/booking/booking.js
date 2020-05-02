@@ -17,27 +17,11 @@ var BookingSchema = new Schema({
         default: false,
         required: true
     },
-    riderLat: {
-        type: String,
-        required: true
-    },
-    riderLong: {
-        type: String,
-        required: true
-    },
-    driverLat: {
-        type: String,
-        required: true
-    },
-    driverLong: {
-        type: String,
-        required: true
-    },
     createdAt: {
         type: Date,
         required: true,
         default: Date.now,
-        index: { expires: '3m' }
+        expires: '2m'
     }
 })
 

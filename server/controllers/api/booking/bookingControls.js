@@ -1,11 +1,10 @@
 var BookingSchema = require('../../../models/booking/booking')
 var ConfirmedSchema = require('../../../models/booking/confirmedBooking')
 
-exports.bookRide = async (req, res) =>
-{
-    const { riderId, driverId, driverLat, driverLong, riderLat, riderLong } = req.body
-    const data = { riderId, driverId, driverLat, driverLong, riderLat, riderLong }
-    if(riderId && driverId && driverLat && driverLong && riderLat && riderLong)
+exports.bookRide = async (req, res) => {
+    const { riderId, driverId } = req.body
+    const data = { riderId, driverId }
+    if(riderId && driverId)
     {
         try
         {
@@ -47,7 +46,7 @@ exports.bookRide = async (req, res) =>
     }
 } 
 
-exports.confirmRide = async (req, res) => {
+exports.availableRides= async (req, res) => {
     const _id = req.locals._id
     if(req.locals._id)
     {
@@ -99,7 +98,9 @@ exports.driverConfirmation = async (req, res) => {
         var updatedData = { active }
         try
         {
-            let confirmation = await BookingSchema.findOneAndUpdate({_id: req.body._id}, updatedData)
+            let confirmation = await BookingSchema.findOneAndUpdate({_id: req.body._id}, updatedData, {new:true})
+            .populate('driverId','name phone email gender latitude longitude')
+            .populate('riderId','name phone email gender latitude longitude')
             if(!confirmation)
             {
                 return res.status(400).send({
@@ -109,40 +110,11 @@ exports.driverConfirmation = async (req, res) => {
             }
             else
             {
-                const { riderId, driverId, driverLat, driverLong, riderLat, riderLong } = confirmation
-                const data = { riderId, driverId, driverLat, driverLong, riderLat, riderLong }
-                if(riderId && driverId && driverLat && driverLong && riderLat && riderLong)
-                {
-                    try
-                    {
-                        var newBooking = new ConfirmedSchema(data)
-                        var savedBooking = await newBooking.save()
-                        if(!savedBooking)
-                        {
-                            return  res.status(400).send({
-                                success: false,
-                                error: true,
-                                msg: 'Something went wrong'
-                            })
-                        }
-                        else
-                        {
-                            return res.status(200).send({
-                                success: true,
-                                msg: 'Ride accepted by driver',
-                                data: data
-                            })
-                        }
-                    }
-                    catch(error)
-                    {
-                        res.status(400).send({
-                            success: false,
-                            error: error,
-                            msg: 'Something went wrong'
-                        })
-                    }
-                }
+                return res.status(200).send({
+                    success: true,
+                    msg: 'Successfully accepted ride',
+                    data: confirmation
+                })
             }
         }
         catch(error)
@@ -243,4 +215,29 @@ exports.riderBookedStatus = async (req, res) => {
             })
         }
     }
+}
+
+exports.endRide = async(req, res) => {
+    var _id = req.locals._id
+    try
+    {
+        var endRideData = await BookingSchema.deleteMany({driverId: _id })
+        if(endRideData)
+        {
+            res.status(200).send({
+                success: true,
+                msg: 'Successfully ended ride',
+                data: endRideData
+            })
+        }
+    }
+    catch(error)
+    {
+        return res.status(400).send({
+            success: true,
+            msg: 'Something went wrong',
+            error: error
+        })
+    }
+
 }

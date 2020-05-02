@@ -12,22 +12,6 @@ var BookingSchema = new Schema({
         required: true,
         ref: 'Driver'
     },
-    riderLat: {
-        type: String,
-        required: true
-    },
-    riderLong: {
-        type: String,
-        required: true
-    },
-    driverLat: {
-        type: String,
-        required: true
-    },
-    driverLong: {
-        type: String,
-        required: true
-    },
     createdAt: {
         type: Date,
         required: true,

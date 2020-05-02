@@ -15,7 +15,7 @@ const uri = `mongodb+srv://shreyansh:${process.env.MONGODBPASS}@cluster0-wfbhz.m
 mongoose.set('useCreateIndex', true) // To remove this warning. DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
 mongoose
     // .connect(uri, {promiseLibrary: require('bluebird'), useNewUrlParser: true, useUnifiedTopology: true  })
-    .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true  })
+    .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false   })
     .then (()=> console.log('connection successful'))
     .catch((err)=> console.log(err))
 

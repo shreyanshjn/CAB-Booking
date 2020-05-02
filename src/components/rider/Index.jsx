@@ -10,6 +10,7 @@ var carIcon = new Icon({
     iconUrl: '/pickup-car.svg',
     iconSize: [25,25]
 })
+var timeRun = 1
 export default class Rider extends React.Component {
     constructor()
     {
@@ -19,24 +20,60 @@ export default class Rider extends React.Component {
             longitude: '',
             drivers: '',
             wait: false,
-            book: false
+            book: false,
+            rideMode: false,
+            error: false
         }
         this.Auth = new AuthService()
     }
     async componentDidMount() 
     {
-        this.getLocation()
-        this.refreshInterval = setInterval(this.updateLocation, 10000)
-        this.activeDriverInterval = setInterval(this.getActiveDrivers,5000)
+        this.getLocation();
+        this.activeDriverInterval = setInterval(this.getActiveDrivers,2000)
     }
-    riderBookingStatus = async () => {
-        let token = this.Auth.getToken('rider')
-        await FetchApi('get', '/api/booking/riderBookedStatus', null, token)
+    getLocation = () => {
+        if (navigator.geolocation) {
+            // navigator.geolocation.getCurrentPosition(this.getCoordinates,this.handleErrors)
+            this.watchId = navigator.geolocation.watchPosition(this.getCoordinates, this.handleErrors)
+        } else {
+            alert("Geolocation is not supported by this browser.")
+        }
+    }
+    getCoordinates = (position) => {
+        console.log('done')
+        this.setState({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        })
+        this.updateLocation()
+    }
+    handleErrors = (error) => {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("User denied the request for Geolocation.")
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is unavailable.")
+                break;
+            case error.TIMEOUT:
+                alert("The request to get user location timed out.")
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("An unknown error occurred.")
+                break;
+            default:
+                alert("UNKNOWN_ERROR")
+        }
+    }
+    updateLocation = async () => {
+        const token = this.Auth.getToken('rider')
+        var { latitude, longitude } = this.state
+        var data = { latitude, longitude }
+        await FetchApi('post','/api/rider/updateLocation', data, token)
             .then(res => {
-                console.log(res.data)
-                if(res.data)
+                if(res && res.data && res.data.data)
                 {
-                    this.props.history.push(`/rider/${res.data.data.riderId}`)
+                    this.props.updateUserData(res.data.data)
                 }
             })
             .catch(err => {
@@ -44,7 +81,7 @@ export default class Rider extends React.Component {
             })
     }
     getActiveDrivers = async () => {
-        await FetchApi('get','/api/rider/getDrivers',null)
+        await FetchApi('get','/api/driver/activeDrivers',null)
             .then(res => {
                 console.log(res.data)
                 if(res && res.data.success && res.data.data)
@@ -70,19 +107,37 @@ export default class Rider extends React.Component {
                 console.log(err)
             })
     }
-    getLocation = () => {
-        if (navigator.geolocation) {
-            // navigator.geolocation.getCurrentPosition(this.getCoordinates,this.handleErrors)
-            this.watchId = navigator.geolocation.watchPosition(this.getCoordinates)
-        } else {
-            alert("Geolocation is not supported by this browser.")
+    riderBookingStatus = async () => {
+        timeRun+=1
+        if(timeRun==60)
+        {
+            this.setState({
+                wait: false
+            })
+            clearInterval(this.riderStatusInterval)
         }
-    }
-    getCoordinates = (position) => {
-        this.setState({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-        })
+        let token = this.Auth.getToken('rider')
+        try
+        {
+
+        await FetchApi('get', '/api/booking/riderBookedStatus', null, token)
+            .then(res => {
+                console.log(res.data)
+                if(res.data)
+                {
+                    clearInterval(this.activeDriverInterval)
+                    // clearInterval(this.riderStatusInterval)
+                    this.setState({
+                        rideMode: true
+                    })
+                    // this.props.history.push(`/rider/${res.data.data.riderId}`)
+                }
+            })
+        }
+        catch(err)
+        {
+            console.log(err.response)
+        }
     }
     getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
         var R = 6371; // Radius of the earth in km
@@ -100,43 +155,23 @@ export default class Rider extends React.Component {
     deg2rad = (deg) => {
         return deg * (Math.PI/180)
     }
-    handleErrors = (error) => {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                alert("User denied the request for Geolocation.")
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable.")
-                break;
-            case error.TIMEOUT:
-                alert("The request to get user location timed out.")
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("An unknown error occurred.")
-                break;
-            default:
-                alert("UNKNOWN_ERROR")
-        }
-    }
     bookCab = async () => {
-        let riderLat,riderLong,driverLat,driverLong,driverId,riderId
+        let driverId,riderId
         let x2 = this.state.latitude
         let y2 = this.state.longitude
-        let minDis = 0, count = 0
+        let minDis = 10000000, count = 0
         this.state.drivers.map((cab, index) => {
-            let x1 = cab.latitude
-            let y1 = cab.longitude
+            let x1 = cab.driverId.latitude
+            let y1 = cab.driverId.longitude
             let dis = this.getDistanceFromLatLonInKm(x2,y2,x1,y1)
-            if(dis<=minDis)
+            console.log(dis,'distance')
+            console.log(cab)
+            if(dis<=minDis) 
             {
                 minDis=dis
-                driverId=cab._userId
-                riderLat=x2
-                riderLong=y2
-                driverLat=x1
-                driverLong=y1
+                driverId=cab.driverId._id
+                count++
             }
-            count++
             console.log(dis)
         })
         console.log(count,'count')
@@ -144,7 +179,8 @@ export default class Rider extends React.Component {
         {
             let token = this.Auth.getToken('rider')
             const riderId = this.props.userData._id
-            const data = { riderId, driverId, driverLat, driverLong, riderLat, riderLong }
+            const data = { riderId, driverId }
+            console.log(data,'book cab')
             await FetchApi('post','/api/booking/bookRide',data, token)
                 .then(res => {
                     console.log(res.data)
@@ -155,49 +191,56 @@ export default class Rider extends React.Component {
                 .catch(err => {
                     console.log(err)
                 })
-            this.riderStatusInteval = setInterval(this.riderBookingStatus,2000)
+            this.riderStatusInterval = setInterval(this.riderBookingStatus,2000)
         }
     }
     componentWillUnmount() {
         console.log('unmounted')
-        clearInterval(this.refreshInterval)
         clearInterval(this.activeDriverInterval)
+        clearInterval(this.riderStatusInterval)
         navigator.geolocation.clearWatch(this.watchId);
     }
     render()
     {
-        const { drivers, book, wait } = this.state
+        const { rideMode, drivers, book, wait } = this.state
         return (
             <div>
-                {this.state.longitude && this.state.latitude ?
-                <Map center={[this.state.latitude,this.state.longitude]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} boxZoom={false}>
-                    <TileLayer attribution='&copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    <Marker 
-                        position={[this.state.latitude,this.state.longitude]} 
-                    />
-                    {drivers? drivers.map((cab,index) => (
+                {!rideMode ? 
+                <React.Fragment>
+                    {this.state.longitude && this.state.latitude ?
+                    <Map center={[this.state.latitude,this.state.longitude]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} boxZoom={false}>
+                        <TileLayer attribution='&copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         <Marker 
-                            icon={carIcon}
-                            position={[cab.latitude,cab.longitude]}
-                            key={index}
-                        />
-                    ))
-                    :null}
-                </Map>: 
-                <div>
-                    You need to give location permission
-                </div>
-                }
+                            position={[this.state.latitude,this.state.longitude]} 
+                            />
+                            {drivers? drivers.map((cab,index) => (
+                                <Marker 
+                                icon={carIcon}
+                                position={[cab.driverId.latitude,cab.driverId.longitude]}
+                                key={index}
+                                />
+                            ))
+                            :null}
+                        </Map>: 
+                            <div>
+                                You need to give location permission
+                            </div>
+                    }
                 {wait ?
                 <CircularProgress color="secondary" />
+                        :
+                        book ?<Button variant="contained" onClick={this.bookCab} color="primary">
+                        Book a Ride
+                        </Button> :
+                        <div>
+                            No cabs available
+                        </div>}
+                        <Logout user="rider" history={this.props.history} updateAuthentication={this.props.updateAuthentication} />
+                    </React.Fragment>
                 :
-                book ?<Button variant="contained" onClick={this.bookCab} color="primary">
-                    Book a Ride
-                </Button> :
                 <div>
-                    No cabs available
+                    ok
                 </div>}
-                <Logout user="rider" history={this.props.history} updateAuthentication={this.props.updateAuthentication} />
             </div>
         )
     }
