@@ -11,7 +11,7 @@ var app=express()
 var debug = require('debug')('mean-app:server');
 
 // mongoose.Promise = require('bluebird')
-const uri = `mongodb+srv://shreyansh:${process.env.MONGODBPASS}@cluster0-wfbhz.mongodb.net/test?retryWrites=true&w=majority`;
+const uri = process.env.URI
 mongoose.set('useCreateIndex', true) // To remove this warning. DeprecationWarning: collection.ensureIndex is deprecated. Use createIndexes instead.
 mongoose
     // .connect(uri, {promiseLibrary: require('bluebird'), useNewUrlParser: true, useUnifiedTopology: true  })
