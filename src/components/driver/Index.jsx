@@ -84,7 +84,9 @@ export default class Driver extends React.Component
                 }
             })
             .catch(err => {
-                console.log(err)
+                    this.setState({
+                        error: err
+                    })
             })
     }
     setDriverActive = async () => {
@@ -95,8 +97,10 @@ export default class Driver extends React.Component
                     activeStatus: true
                 })
             })
-            .catch(error=> {
-                console.log(error)
+            .catch(err=> {
+                    this.setState({
+                        error: err
+                    })
             })
     }
     setDriverInactive = async () => {
@@ -107,8 +111,10 @@ export default class Driver extends React.Component
                     activeStatus: false
                 })
             })
-            .catch(error=> {
-                console.log(error)
+            .catch(err => {
+                    this.setState({
+                        error: err
+                    })
             })
     }
     recheckActiveStatus = async () => {
@@ -123,7 +129,6 @@ export default class Driver extends React.Component
         {
             await FetchApi('get','/api/booking/availableRides',null,token)
                 .then(res => {
-                    console.log(res.data)
                     if(res && res.data)
                     {
                         this.setState({
@@ -132,19 +137,19 @@ export default class Driver extends React.Component
                     }
                 })
                 .catch(err => {
-                    console.log(err)
+                    this.setState({
+                        error: err
+                    })
                 })
         }
     }
     getRiderLiveLocation = async (req, res) => {
         var _id = this.state.riderDetails._id
         var data = {_id}
-        console.log(data,'ddd')
         if(data)
         {
             await FetchApi('post','/api/rider/getLiveLocation',data)
                 .then(res => {
-                    console.log(res.data)
                     if(res && res.data)
                     {
                         this.setState({
@@ -154,22 +159,20 @@ export default class Driver extends React.Component
                     }
                 })
                 .catch(err => {
-                    console.log(err)
+                    this.setState({
+                        error: err
+                    })
                 })
         }
     }
     acceptRide = async (ride) => {
-        console.log(ride)
         const token = this.Auth.getToken('driver')
         if(token)
         {
             const _id = ride._id
             const data = { _id }
-            // console.log(data)
             await FetchApi('post','/api/booking/driverConfirmation',data,token)
                 .then(res => {
-                    console.log(res.data)
-                    clearInterval(this.availableRidesInterval)
                     this.setDriverInactive()
                     this.setState({
                         rideMode: true,
@@ -181,35 +184,19 @@ export default class Driver extends React.Component
                     this.getRiderLocationInterval = setInterval(this.getRiderLiveLocation,10000)
                     // this.props.history.push(`/driver/${res.data.data.driverId}`)
                 })
-                .catch(error => {
-                    console.log(error)
+                .catch(err => {
+                    this.setState({
+                        error: err
+                    })
                 })
         }
     }
     async componentWillUnmount() {
-        console.log('unmounted')
         clearInterval(this.availableRidesInterval)
         clearInterval(this.setActiveInterval)
         clearInterval(this.getRiderLocationInterval)
         navigator.geolocation.clearWatch(this.watchId);
     }
-    // toggleActive = async () => {
-    //     await this.setState({
-    //         activeStatus: !this.state.activeStatus
-    //     })
-    //     const token = this.Auth.getToken('driver')
-    //     var { activeStatus } = this.state
-    //     console.log(activeStatus)
-    //     var data = { activeStatus }
-    //     await FetchApi('post','/api/driver/toggleActiveStatus', data, token)
-    //         .then(res => {
-    //             if(res && res.data && res.data.data)
-    //                 this.props.updateUserData(res.data.data)
-    //         })
-    //         .catch(err => {
-    //             console.log(err)
-    //         })
-    // }
     render()
     {
         var { rideMode, activeStatus, activeRides, riderLat, riderLong, longitude, latitude, riderDetails } = this.state
@@ -241,7 +228,7 @@ export default class Driver extends React.Component
                                         <Logout user="driver" history={this.props.history} updateAuthentication={this.props.updateAuthentication}/>
                     {activeRides && activeRides.length>0 ? activeRides.map((rider, index) => {
                         return (
-                            <div>
+                            <div key={index}>
                                 <div>
                                     { rider.riderId.name }
                                 </div>

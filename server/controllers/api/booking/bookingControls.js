@@ -180,9 +180,11 @@ exports.riderBookedStatus = async (req, res) => {
         try
         {
             var searchBooking = await BookingSchema.findOne({riderId: req.locals._id})
+            .populate('driverId','name phone gender longitude latitude')
+            .populate('riderId','name phone gender longitude latitude')
             if(!searchBooking)
             {
-                return res.status(400).send({
+                return res.status(200).send({
                     success: true,
                     msg: 'Rider has not booked a ride',
                 })

@@ -5,6 +5,7 @@ import { Button, CircularProgress } from '@material-ui/core'
 import FetchApi from '../../utils/FetchApi'
 import AuthService from '../../handlers/AuthService'
 import Logout from '../logout/Logout'
+import BookingDashboard from './Bookings'
 
 var carIcon = new Icon({
     iconUrl: '/pickup-car.svg',
@@ -22,7 +23,10 @@ export default class Rider extends React.Component {
             wait: false,
             book: false,
             rideMode: false,
-            error: false
+            error: false,
+            driverLat: '',
+            driverLong: '',
+            driverDetails: ''
         }
         this.Auth = new AuthService()
     }
@@ -30,6 +34,28 @@ export default class Rider extends React.Component {
     {
         this.getLocation();
         this.activeDriverInterval = setInterval(this.getActiveDrivers,2000)
+    }
+    getDriverLiveLocation = async (req, res) => {
+        var _id = this.state.driverDetails._id
+        var data = {_id}
+        if(data)
+        {
+            await FetchApi('post','/api/driver/getLiveLocation',data)
+                .then(res => {
+                    if(res && res.data)
+                    {
+                        this.setState({
+                            driverLat: res.data.data.latitude,
+                            driverLong: res.data.data.longitude
+                        })
+                    }
+                })
+                .catch(err => {
+                    this.setState({
+                        error: err
+                    })
+                })
+        }
     }
     getLocation = () => {
         if (navigator.geolocation) {
@@ -40,7 +66,6 @@ export default class Rider extends React.Component {
         }
     }
     getCoordinates = (position) => {
-        console.log('done')
         this.setState({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
@@ -77,13 +102,17 @@ export default class Rider extends React.Component {
                 }
             })
             .catch(err => {
-                console.log(err)
+                if(err)
+                {
+                    this.setState({
+                        error: err
+                    })
+                }
             })
     }
     getActiveDrivers = async () => {
         await FetchApi('get','/api/driver/activeDrivers',null)
             .then(res => {
-                console.log(res.data)
                 if(res && res.data.success && res.data.data)
                 {
                     this.setState({
@@ -104,12 +133,17 @@ export default class Rider extends React.Component {
                 }
             })
             .catch(err => {
-                console.log(err)
+                if(err)
+                {
+                    this.setState({
+                        error: err
+                    })
+                }
             })
     }
     riderBookingStatus = async () => {
         timeRun+=1
-        if(timeRun==60)
+        if(timeRun==30)
         {
             this.setState({
                 wait: false
@@ -122,21 +156,34 @@ export default class Rider extends React.Component {
 
         await FetchApi('get', '/api/booking/riderBookedStatus', null, token)
             .then(res => {
-                console.log(res.data)
+                if(res.data.msg === "Rider has not booked a ride")
+                {
+                    this.setState({
+                        rideMode: false,
+                        wait: false
+                    })
+                }
                 if(res.data)
                 {
-                    clearInterval(this.activeDriverInterval)
-                    // clearInterval(this.riderStatusInterval)
+                    // clearInterval(this.activeDriverInterval)
                     this.setState({
-                        rideMode: true
+                        rideMode: true,
+                        driverDetails: res.data.data.driverId,
+                        driverLat: res.data.data.driverId.latitude,
+                        driverLong: res.data.data.driverId.longitude,
                     })
-                    // this.props.history.push(`/rider/${res.data.data.riderId}`)
+                    this.getDriverLocationInterval = setInterval(this.getDriverLiveLocation,5000)
                 }
             })
         }
         catch(err)
         {
-            console.log(err.response)
+            if(err)
+            {
+                this.setState({
+                    error: err,
+                })
+            }
         }
     }
     getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
@@ -164,45 +211,43 @@ export default class Rider extends React.Component {
             let x1 = cab.driverId.latitude
             let y1 = cab.driverId.longitude
             let dis = this.getDistanceFromLatLonInKm(x2,y2,x1,y1)
-            console.log(dis,'distance')
-            console.log(cab)
             if(dis<=minDis) 
             {
                 minDis=dis
                 driverId=cab.driverId._id
                 count++
             }
-            console.log(dis)
         })
-        console.log(count,'count')
         if(count > 0)
         {
             let token = this.Auth.getToken('rider')
             const riderId = this.props.userData._id
             const data = { riderId, driverId }
-            console.log(data,'book cab')
             await FetchApi('post','/api/booking/bookRide',data, token)
                 .then(res => {
-                    console.log(res.data)
                     this.setState({
                         wait: true
                     })
                 })
                 .catch(err => {
-                    console.log(err)
+                    if(err)
+                    {
+                        this.setState({
+                            error: err
+                        })
+                    }
                 })
             this.riderStatusInterval = setInterval(this.riderBookingStatus,2000)
         }
     }
     componentWillUnmount() {
-        console.log('unmounted')
         clearInterval(this.activeDriverInterval)
         clearInterval(this.riderStatusInterval)
         navigator.geolocation.clearWatch(this.watchId);
     }
     render()
     {
-        const { rideMode, drivers, book, wait } = this.state
+        const { rideMode, drivers, book, wait, driverDetails, driverLat, driverLong, longitude, latitude} = this.state
         return (
             <div>
                 {!rideMode ? 
@@ -239,7 +284,14 @@ export default class Rider extends React.Component {
                     </React.Fragment>
                 :
                 <div>
-                    ok
+                        <BookingDashboard 
+                            driverDetails={driverDetails}
+                            driverLat={driverLat}
+                            driverLong={driverLong}
+                            riderDetails={this.props.userData}
+                            riderLat={latitude}
+                            riderLong={longitude}
+                        />
                 </div>}
             </div>
         )

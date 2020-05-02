@@ -29,7 +29,6 @@ exports.registerRider= async (req, res) =>  {
             data.password=hashedPass
             var newUser = new riderSchema(data)
             var saveUser = await newUser.save();
-            console.log(saveUser)
             if(saveUser._id)
             {
                 res.status(200).send({
@@ -74,7 +73,6 @@ exports.loginRider=  async (req, res) => {
     try
     {
         let user = await riderSchema.findOne({ email: email })
-        console.log(user)
         if(!user)
         {
             res.status(400).send({
@@ -86,11 +84,9 @@ exports.loginRider=  async (req, res) => {
         else
         {
             var pass = await bcrypt.compare(password,user.password)
-            console.log(pass)
             if(pass)
             {
                 var deletePrevToken = await riderToken.deleteOne({_userId:user._id})
-                console.log(deletePrevToken)
                 if(!deletePrevToken)
                 {
                     res.status(400).send({
@@ -104,7 +100,6 @@ exports.loginRider=  async (req, res) => {
                 var data = { _userId, token }
                 var newToken = new riderToken(data)
                 var saveToken = await newToken.save()
-                console.log(saveToken,'token')
                 if(saveToken)
                 {
                     res.status(200).send({

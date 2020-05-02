@@ -27,22 +27,17 @@ export default class Register extends React.Component {
         })
     }
     handleChange = (e) => {
-        console.log(e.target.name)
         const name = e.target.name
         let value = e.target.value
-        console.log(name)
         this.setState({
             [name]: value,
             error: ''
         })
-        console.log(value)
     }
     onSubmit = async (e) => {
         e.preventDefault()
         let { name, email, phone, gender, password, user } = this.state
         const data ={ name, email, phone, gender, password }
-        console.log(data)
-        console.log(user)
         if(data && user)
         {
             await FetchApi('post', `/api/${user}/register`, data)
@@ -53,7 +48,6 @@ export default class Register extends React.Component {
                     }
                 })
                 .catch(err=>{
-                    console.log(err.response)
                     if(err && err.response && err.response.data && err.response.data.msg)
                     {
                         this.setState({

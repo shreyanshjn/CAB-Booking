@@ -167,7 +167,7 @@ exports.setDriverActive = async (req, res) => {
 }
 
 exports.getLiveLocation = async (req, res) => {
-    var { _id } = req.body._id
+    var _id = req.body._id
     if(!_id)
     {
         return res.status(400).send({
