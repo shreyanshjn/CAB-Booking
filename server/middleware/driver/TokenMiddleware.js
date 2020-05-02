@@ -4,9 +4,7 @@ var driverToken = require('../../models/driver/driver_token.js')
 exports.verifyToken = async (req, res, next) => {
     var authHeader = req.get('Authorization')
     if (authHeader !== undefined) {
-        console.log(user)
         var user = await driverToken.findOne({ token: authHeader })
-        console.log(user)
         if(!user)
         {
             res.status(403).send({

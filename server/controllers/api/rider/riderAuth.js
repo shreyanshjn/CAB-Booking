@@ -1,6 +1,5 @@
 var riderSchema= require('../../../models/rider/rider')
 var riderToken = require('../../../models/rider/rider_token')
-var activeDriver = require('../../../models/driver/activeDriver')
 var { generateHash } = require('../../../helpers/HashPassword')
 var { generateUserToken } = require('../../../helpers/TokenHelper')
 var bcrypt = require('bcryptjs')

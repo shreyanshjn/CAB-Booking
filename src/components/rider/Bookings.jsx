@@ -1,8 +1,7 @@
 import React from 'react'
 import { Map, TileLayer, Marker } from 'react-leaflet'
 import { Icon } from 'leaflet'
-import { Button, Box } from '@material-ui/core'
-import FetchApi from '../../utils/FetchApi'
+import { Box } from '@material-ui/core'
 import AuthService from '../../handlers/AuthService'
 
 var carIcon = new Icon({
@@ -20,7 +19,7 @@ export default class DriverDashboard extends React.Component {
     }
     render()
     {
-        let { driverLat, driverLong, riderLat, riderLong, riderDetails, driverDetails } = this.props
+        let { driverLat, driverLong, riderLat, riderLong, driverDetails } = this.props
         return (
             <React.Fragment>
                 <Map center={[riderLat,riderLong]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} boxZoom={false}>

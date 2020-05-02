@@ -12,7 +12,7 @@ export default class App extends React.Component {
         super()
         this.state={
             email:'',
-            password:'asdfghjkl',
+            password:'',
             user: '',
             error: ''
         }

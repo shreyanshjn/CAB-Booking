@@ -9,11 +9,11 @@ export default class Register extends React.Component {
     {
         super()
         this.state={
-            name:'sfa',
-            email:'fasdfa@kf.com',
-            phone:'349123849',
+            name:'',
+            email:'',
+            phone:'',
             gender:'',
-            password:'asdfghjkl',
+            password:'',
             user:'',
             latitude:'',
             longitude:'',

@@ -26,11 +26,9 @@ exports.registerDriver = async (req, res) =>  {
         if(hashedPass)
         {
             var data={ name, email, gender, password, phone }
-            console.log(data)
             data.password=hashedPass
             var newUser = new driverSchema(data)
             var saveUser = await newUser.save();
-            console.log(saveUser)
             if(saveUser._id)
             {
                 res.status(200).send({
@@ -75,7 +73,6 @@ exports.loginDriver =  async (req, res) => {
     try
     {
         var user = await driverSchema.findOne({ email: email })
-        console.log(user)
         if(!user)
         {
             res.status(400).send({
@@ -87,11 +84,9 @@ exports.loginDriver =  async (req, res) => {
         else
         {
             var pass = await bcrypt.compare(password,user.password)
-            console.log(pass)
             if(pass)
             {
                 var deletePrevToken = await driverToken.deleteOne({_userId:user._id})
-                console.log(deletePrevToken)
                 if(!deletePrevToken)
                 {
                     res.status(400).send({
@@ -101,12 +96,10 @@ exports.loginDriver =  async (req, res) => {
                     })
                 }
                 var token = generateUserToken(user._id, user.email)
-                console.log(token)
                 var _userId  = user._id
                 var data = { _userId, token }
                 var newToken = new driverToken(data)
                 var saveToken = await newToken.save()
-                console.log(saveToken,'token')
                 if(saveToken)
                 {
                     res.status(200).send({
@@ -140,7 +133,6 @@ exports.loginDriver =  async (req, res) => {
 exports.setActive= async (req, res) => {
     const { latitude, longitude, active } = req.body
     const _userId = req.locals._id
-    console.log(req.body)
     if(!latitude || !longitude || !active || !_userId)
     {
         res.status(400).send({
@@ -155,7 +147,6 @@ exports.setActive= async (req, res) => {
         {
             var data = { latitude, longitude, active, _userId } 
             var findDriver = await activeDriver.findOne({_userId: _userId})
-            console.log(findDriver,'findDriver')
             if(findDriver)
             {
                 var createdAt = Date.now()
@@ -181,7 +172,6 @@ exports.setActive= async (req, res) => {
             {
                 var newUser = new activeDriver(data)
                 var savedUser = await newUser.save()
-                console.log(savedUser)
                 if(!savedUser)
                 {
                     res.status(400).send({

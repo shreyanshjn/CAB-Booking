@@ -32,8 +32,8 @@ export default class Driver extends React.Component
     }
     componentDidMount() {
         this.getLocation()
-        this.availableRidesInterval= setInterval(this.availableRides, 5000);
-        this.setActiveInterval = setInterval(this.recheckActiveStatus,5000)
+        this.availableRidesInterval= setInterval(this.availableRides, 2000);
+        this.setActiveInterval = setInterval(this.recheckActiveStatus,2000)
     }
     updateRideMode = () => {
         this.setState({
@@ -181,7 +181,7 @@ export default class Driver extends React.Component
                         riderLong: res.data.data.riderId.longitude,
                         activeRides: ''
                     })
-                    this.getRiderLocationInterval = setInterval(this.getRiderLiveLocation,10000)
+                    this.getRiderLocationInterval = setInterval(this.getRiderLiveLocation,2000)
                     // this.props.history.push(`/driver/${res.data.data.driverId}`)
                 })
                 .catch(err => {

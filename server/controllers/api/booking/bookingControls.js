@@ -52,7 +52,6 @@ exports.availableRides= async (req, res) => {
     {
         try
         {
-            console.log(req.locals._id)
             var bookDetails = await BookingSchema.find({ driverId: _id })
                 .populate('riderId' , 'name phone')
             if(!bookDetails)

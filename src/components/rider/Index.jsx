@@ -143,7 +143,7 @@ export default class Rider extends React.Component {
     }
     riderBookingStatus = async () => {
         timeRun+=1
-        if(timeRun==30)
+        if(timeRun===30)
         {
             this.setState({
                 wait: false
@@ -172,7 +172,7 @@ export default class Rider extends React.Component {
                         driverLat: res.data.data.driverId.latitude,
                         driverLong: res.data.data.driverId.longitude,
                     })
-                    this.getDriverLocationInterval = setInterval(this.getDriverLiveLocation,5000)
+                    this.getDriverLocationInterval = setInterval(this.getDriverLiveLocation,2000)
                 }
             })
         }
@@ -203,10 +203,10 @@ export default class Rider extends React.Component {
         return deg * (Math.PI/180)
     }
     bookCab = async () => {
-        let driverId,riderId
+        let driverId
         let x2 = this.state.latitude
         let y2 = this.state.longitude
-        let minDis = 10000000, count = 0
+        let minDis = 100000, count = 0
         this.state.drivers.map((cab, index) => {
             let x1 = cab.driverId.latitude
             let y1 = cab.driverId.longitude

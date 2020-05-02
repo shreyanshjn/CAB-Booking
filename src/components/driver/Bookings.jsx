@@ -20,16 +20,16 @@ export default class DriverDashboard extends React.Component {
         const token = this.Auth.getToken('driver')
         await FetchApi('post','/api/booking/endRide', null, token)
             .then(res => {
-                console.log(res.data)
             })
             .catch(err => {
-                console.log(err)
+                    this.setState({
+                        error: err
+                    })
             })
     }
     render()
     {
-        console.log(this.props)
-        let { driverLat, driverLong, riderLat, riderLong, riderDetails, driverDetails } = this.props
+        let { driverLat, driverLong, riderLat, riderLong, riderDetails } = this.props
         return (
             <React.Fragment>
                 <Map center={[driverLat,driverLong]} zoom={12} touchZoom={false} zoomSnap={0} dragging={true} doubleClickZoom={false} boxZoom={false}>
