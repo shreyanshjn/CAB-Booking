@@ -268,7 +268,7 @@ export default class Rider extends React.Component {
                             :null}
                         </Map>: 
                             <div>
-                                You need to give location permission
+                                Have paitence while the map is being loaded. Sometimes, it takes time.
                             </div>
                     }
                 {wait ?

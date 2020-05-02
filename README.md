@@ -34,12 +34,13 @@ Link:- https://www.mongodb.com/cloud/atlas
 
 2. Currently, there is no limitation on what the distance between the cab and the person should be for booking the cab, but the nearest cab is always chosen when the rider books a cab.
 
-3. Rider and driver can't fetch their ride history.
+3. Rider and driver can't fetch their ride history. Also there is no option to view one's profile.
 
 4. No fare is being shown on booking a ride.
 
 5. The system of rating also needs to be introduced.
 
+6. The frontend of the website needs to be made more user-friendly.
 
         
  

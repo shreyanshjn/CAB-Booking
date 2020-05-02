@@ -218,7 +218,10 @@ export default class Driver extends React.Component
                             />
                             </Map>
                             :
-                        null}
+                            <div>
+                                Have paitence while the map is being loaded.Sometimes, it takes time.
+                            </div>
+                        }
                             {!activeStatus? <Button onClick={this.setDriverActive} variant="contained" color="primary">
                             Set Active
                                     </Button> :
